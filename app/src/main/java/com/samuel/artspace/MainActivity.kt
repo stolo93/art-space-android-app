@@ -28,6 +28,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -42,6 +46,11 @@ import com.samuel.artspace.ui.theme.ArtSpaceTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val archive = ArtArchive()
+        archive.addArt(ArtworkRes(title = R.string.artwork_title_0, artist = R.string.artwork_artist_0, year = R.string.artwork_year_0, image = R.drawable.background_0))
+        archive.addArt(ArtworkRes(title = R.string.artwork_title_1, artist = R.string.artwork_artist_0, year = R.string.artwork_year_0, image = R.drawable.background_1))
+        archive.addArt(ArtworkRes(title = R.string.artwork_name_2, artist = R.string.artwork_artist_0, year = R.string.artwork_year_0, image = R.drawable.background_2))
+
         setContent {
             ArtSpaceTheme {
                 // A surface container using the 'background' color from the theme
@@ -49,7 +58,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ArtSpaceScreen()
+                    ArtSpaceScreen(archive)
                 }
             }
         }
@@ -57,13 +66,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ArtSpaceScreen(modifier: Modifier = Modifier) {
-    val art = ArtworkRes(
-        title = R.string.artwork_title,
-        artist = R.string.artwork_artist,
-        year = R.string.artwork_year,
-        image = R.drawable.androidparty
-    )
+fun ArtSpaceScreen(artWorkArchive: ArtArchive,modifier: Modifier = Modifier) {
+    var art by remember { mutableStateOf(artWorkArchive.firstArt()) }
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -75,8 +79,8 @@ fun ArtSpaceScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.weight(5f)
         )
         DisplayController(
-            onNext = {},
-            onPrevious = {},
+            onNext = {art = artWorkArchive.nextArt()},
+            onPrevious = {art = artWorkArchive.previousArt()},
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 20.dp)
@@ -98,7 +102,9 @@ fun ArtWorkDisplay(artWork: ArtworkRes, modifier: Modifier = Modifier) {
         ) {
             ArtWorkWall(
                 image = artWork.image,
-                modifier = Modifier.fillMaxWidth().weight(6f)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(6f)
             )
             Spacer(
                 Modifier.size(10.dp)
@@ -107,7 +113,9 @@ fun ArtWorkDisplay(artWork: ArtworkRes, modifier: Modifier = Modifier) {
                 title = artWork.title,
                 artist = artWork.artist,
                 year = artWork.year,
-                modifier = Modifier.fillMaxWidth().weight(1f)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
             )
         }
     }
@@ -184,11 +192,11 @@ fun DisplayController(
         //Button Previous
         NavigationButton(
             direction = Direction.Previous,
-            onClick = { }
+            onClick = onPrevious
         )
         NavigationButton(
             direction = Direction.Next,
-            onClick = { }
+            onClick = onNext
         )
     }
 }
@@ -219,8 +227,13 @@ fun NavigationButton(
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
+    val archive = ArtArchive()
+    archive.addArt(ArtworkRes(title = R.string.artwork_title_0, artist = R.string.artwork_artist_0, year = R.string.artwork_year_0, image = R.drawable.background_0))
+    archive.addArt(ArtworkRes(title = R.string.artwork_title_1, artist = R.string.artwork_artist_0, year = R.string.artwork_year_0, image = R.drawable.background_1))
+    archive.addArt(ArtworkRes(title = R.string.artwork_name_2, artist = R.string.artwork_artist_0, year = R.string.artwork_year_0, image = R.drawable.background_2))
+
     ArtSpaceTheme {
-        ArtSpaceScreen()
+        ArtSpaceScreen(archive)
     }
 }
 
@@ -233,4 +246,30 @@ data class ArtworkRes(
 
 enum class Direction {
     Next, Previous
+}
+
+class ArtArchive(private val arts: MutableList<ArtworkRes> = mutableListOf()) {
+    private var curArt: Int = 0
+
+    fun firstArt(): ArtworkRes {
+        curArt = 0
+        return arts[curArt]
+    }
+    fun addArt(art: ArtworkRes): Unit {
+        arts.add(art)
+    }
+
+    fun nextArt(): ArtworkRes {
+        curArt = (curArt + 1) % arts.size
+        return arts[curArt]
+    }
+
+    fun previousArt(): ArtworkRes {
+        if (curArt - 1 < 0) {
+            curArt = arts.size - 1
+        } else {
+            curArt -= 1
+        }
+        return arts[curArt]
+    }
 }
