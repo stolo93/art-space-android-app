@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Art Space</string>
-    <string name="artwork_title">The abstract party</string>
-    <string name="artwork_artist">Unknown artist</string>
-    <string name="artwork_year">1999</string>
+    <string name="artwork_title_0">The abstract party</string>
+    <string name="artwork_artist_0">Unknown artist</string>
+    <string name="artwork_year_0">1999</string>
+    <string name="artwork_title_1">The midnight sun</string>
+    <string name="artwork_name_2">Blue moon</string>
 </resources>
